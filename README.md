@@ -108,7 +108,7 @@ Long-distance rides, certain payment methods, and historically risky routes are 
 
 The system predicts cancellation risk for a new booking using booking details and route history.
 
-### Example Output
+### Example Output:
 🚦Route-based Prediction:\
 Route : KIA → Silk Board\
 Historical Route Risk : 0.28\
