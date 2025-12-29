@@ -1,202 +1,149 @@
-# 🚕 Ride Cancellation Analysis & Prediction
+# Ride Cancellation Prediction (Uber & Ola)
 
 ## 📌 Project Overview
-Ride cancellations reduce customer satisfaction and cause operational losses for ride-hailing platforms like Ola and Uber.  
-This project analyzes historical ride booking data to understand **when and why cancellations occur** and builds a **machine learning model** to predict the likelihood of cancellation for a new ride request.
 
-Instead of using raw pickup and drop location encodings, the project leverages **route-based historical cancellation risk**, which provides a more meaningful and realistic representation of location behavior.
+This project aims to predict whether a ride booked on platforms like **Uber or Ola** will be **cancelled or not** using Machine Learning.  
+The system is trained on historical ride booking data and predicts cancellation based on ride details such as vehicle type, payment method, ride distance, and booking time.
+
+The project demonstrates a **complete data science pipeline**, including data exploration, data cleaning, model training, and user-based prediction.
 
 ---
 
 ## 🎯 Objectives
-- Analyze booking and cancellation patterns
-- Identify peak booking hours
-- Understand key factors influencing ride cancellations
-- Build a predictive machine learning model
-- Incorporate **route-level cancellation history**
-- Translate predictions into **actionable business decisions**
+
+- To analyze ride booking data and identify patterns related to ride cancellations
+- To preprocess and clean raw data for machine learning
+- To build a machine learning model that predicts ride cancellation
+- To allow users to input ride details and get a cancellation prediction
 
 ---
 
-## 📊 Dataset
-- **Source**: Ola & Uber Ride Booking Dataset (Kaggle)
-- **Records**: ~103,000 rides
-- **Target Variable**: `is_cancelled`
-  - `0` → Not Cancelled
-  - `1` → Cancelled
+## 🗂️ Project Structure
 
-### Final Features Used
-- Booking hour
-- Ride distance
-- Booking value
-- Customer rating
-- Driver rating
-- Payment method
-- **Route cancellation rate**
-
----
-
-## 🧠 Methodology
-
-### 1️⃣ Data Preprocessing
-- Removed irrelevant identifiers
-- Converted date and time columns
-- Extracted booking hour
-- Handled missing values
-- Created binary target variable `is_cancelled`
+```bash
+ride-cancellation-analysis/
+│
+├── data/
+│ ├── raw_rides.csv # Original dataset
+│ ├── cleaned_rides.csv # Cleaned dataset used for training
+│ └── plots/ # EDA output plots and summary
+│
+├── model/
+│ ├── cancel_model.pkl # Trained ML model
+│ ├── vehicle_encoder.pkl # Encoder for vehicle type
+│ └── payment_encoder.pkl # Encoder for payment method
+│
+├── src/
+│ ├── eda.py # Exploratory Data Analysis
+│ ├── clean_data.py # Data cleaning and preprocessing
+│ ├── train.py # Model training and evaluation
+│ └── predict.py # User input and prediction
+│
+├── requirements.txt
+└── README.md
+```
 
 ---
 
-### 2️⃣ Exploratory Data Analysis (EDA)
-- Booking volume by hour
-- Cancellation distribution
-- Ride distance vs cancellation trends
-- Visualizations saved to `outputs/plots/`
+## 📊 Exploratory Data Analysis (EDA)
+
+EDA is performed using `eda.py` to understand:
+
+- Distribution of booking statuses (Cancelled vs Completed)
+- Booking trends based on time of day
+- Missing values and dataset structure
+
+All plots and summaries generated during EDA are saved inside the `data/plots/` folder.
 
 ---
 
-### 3️⃣ Feature Engineering
+## 🧹 Data Cleaning & Preprocessing
 
-#### 🔹 Route Cancellation Rate
-Instead of using raw pickup and drop location encodings, a **route-based feature** was created:
+The `clean_data.py` script:
 
-route_cancellation_rate =
-(Number of cancelled rides on a route) /
-(Total rides on that route)
-
-
-This captures historical cancellation behavior for a given pickup–drop route and avoids misleading numerical encodings of locations.
-
----
-
-### 4️⃣ Machine Learning Models
-Two supervised learning models were trained and compared:
-
-| Model | Accuracy |
-|------|----------|
-| Random Forest Classifier | ~90% |
-| Logistic Regression | ~90% |
-
-**Random Forest** was selected for final predictions due to its robustness and ability to model non-linear relationships.
+- Removes duplicate records
+- Handles missing values
+- Combines date and time columns
+- Extracts booking hour
+- Converts booking status into a binary target variable (`cancelled`)
+- Saves the cleaned dataset as `cleaned_rides.csv`
 
 ---
 
-### 5️⃣ Model Evaluation
-- Overall accuracy ≈ **90%**
-- High recall for cancelled rides (~96%)
-- No data leakage
-- Good generalization on unseen data
+## 🤖 Model Training
+
+The `train.py` script:
+
+- Loads the cleaned dataset
+- Encodes categorical variables
+- Splits data into training and testing sets
+- Trains a **Random Forest Classifier**
+- Evaluates the model using accuracy
+- Saves the trained model and encoders for later use
 
 ---
 
-### 6️⃣ Feature Importance (Key Insights)
+## 🔮 Prediction
 
-| Feature | Importance |
-|-------|------------|
-| Ride Distance | Highest |
-| Payment Method | Very High |
-| Booking Value | Moderate |
-| Route Cancellation Rate | Contextual |
-| Ratings & Time | Supporting |
+The `predict.py` script allows users to:
 
-**Insight**:  
-Long-distance rides, certain payment methods, and historically risky routes are more likely to be cancelled.
+- Enter ride details manually
+- Automatically preprocess the input
+- Predict whether the ride will be **Cancelled** or **Not Cancelled**
 
----
-
-## 🔮 Route-Based Prediction (New Ride)
-
-The system predicts cancellation risk for a new booking using booking details and route history.
-
-### Example Output:
-🚦Route-based Prediction:\
-Route : KIA → Silk Board\
-Historical Route Risk : 0.28\
-Prediction : Not Cancelled\
-Probability : 0.003421\
-Risk Level : Low Risk\
-Suggested Action : Proceed normally
-
-
----
-
-## 🚦 Business Interpretation
-
-| Risk Level | Suggested Action |
-|----------|-----------------|
-| Low Risk | Proceed normally |
-| Medium Risk | Assign experienced driver |
-| High Risk | Offer incentives or avoid assignment |
-
-A **business-rule layer** can optionally override ML predictions for extreme cases, reflecting real-world decision systems.
+The prediction is purely **machine-learning based**, without additional business rules.
 
 ---
 
 ## 🛠️ Technologies Used
+
 - Python
-- Pandas, NumPy
+- Pandas
+- NumPy
+- Matplotlib
 - Scikit-learn
-- Matplotlib, Seaborn
-- Pickle (model persistence)
+- Joblib
 
 ---
 
 ## ▶️ How to Run the Project
 
+1. **Create and activate virtual environment**
+
 ```bash
-# Create virtual environment
 python -m venv .venv
 .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run full pipeline
-python src/main.py
 ```
----
 
-## 📁 Project Structure
+2. **Install dependencies**
+
 ```bash
-ride-cancellation-analysis/
-│
-├── data/
-│   ├── raw/               # Original dataset
-│   │   └── Bookings.csv
-│   └── processed/         # Cleaned and feature-engineered data
-│       └── clean_data.csv
-│
-├── src/
-│   ├── load_data.py       # Load dataset
-│   ├── preprocess.py      # Data cleaning and preprocessing
-│   ├── features.py        # Feature engineering (route risk, encoding)
-│   ├── eda.py             # Exploratory data analysis and plots
-│   ├── train_model.py     # Model training and comparison
-│   ├── evaluate.py        # Model evaluation metrics
-│   ├── predict.py         # Prediction for new ride input
-│   └── main.py            # End-to-end pipeline execution
-│
-├── outputs/
-│   ├── plots/             # Saved EDA visualizations
-│   └── model/
-│       └── cancellation_model.pkl
-│
-├── requirements.txt       # Python dependencies
-├── README.md              # Project documentation
-├── .gitignore             # Files to ignore in Git
-└── .venv/                 # Virtual environment (not committed)
-
+pip install -r requirements.txt
 ```
----
-## 🚀 Future Enhancements
 
-- Use geospatial distance instead of encoded locations
+3. **Run EDA**
 
-- Include weather and traffic conditions
+```bash
+py src/eda.py
+```
 
-- Deploy as a web application
+4. **Clean the data**
 
-- Improve route modeling using clustering techniques
+```bash
+py src/clean_data.py
+```
+
+5. **Train the model**
+
+```bash
+py src/train.py
+```
+
+6. **Run prediction**
+
+```bash
+py src/predict.py
+```
 
 ---
 
@@ -205,7 +152,6 @@ ride-cancellation-analysis/
 - This project demonstrates how data analysis and machine learning can be used to understand and predict ride cancellations.
 - By combining historical patterns, route-level behavior, and predictive modeling, the system provides realistic and actionable insights for ride-hailing platforms.
 
-
 ## ‼️Note:
+
 - Trained model files are excluded from version control due to GitHub file size limits.
-- Run `python src/main.py` to generate the model locally.
